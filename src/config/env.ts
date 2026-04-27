@@ -38,6 +38,7 @@ const ghlSchema = z.object({
 
 const apiSchema = baseSchema.extend({
   PORT: z.coerce.number().default(3000),
+  API_KEY: z.string().min(1),
 });
 
 const workerSchema = baseSchema.merge(apiKeysSchema).merge(ghlSchema);

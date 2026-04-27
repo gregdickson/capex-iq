@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import ejsLayouts from 'express-ejs-layouts';
 import { loadApiEnv } from './config/env.js';
 import { runMigrations } from './db/migrate.js';
+import { apiKeyAuth } from './middleware/auth.js';
 import healthRouter from './routes/health.js';
 import dashboardRouter from './routes/dashboard.js';
 import uploadRouter from './routes/upload.js';
@@ -26,6 +27,24 @@ app.use(ejsLayouts);
 // Body parsing
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Auth middleware (health + login are public, everything else requires API key)
+app.use(apiKeyAuth(env.API_KEY));
+
+// Login routes
+app.get('/login', (_req, res) => {
+  res.render('login', { page: 'login', title: 'Login', error: null });
+});
+
+app.post('/login', (req, res) => {
+  const { key } = req.body as { key: string };
+  if (key === env.API_KEY) {
+    res.setHeader('Set-Cookie', `capexiq_key=${key}; HttpOnly; Path=/; SameSite=Strict; Max-Age=2592000`);
+    res.redirect('/');
+  } else {
+    res.render('login', { page: 'login', title: 'Login', error: 'Invalid key' });
+  }
+});
 
 // Health check (no layout)
 app.use(healthRouter);
