@@ -1,4 +1,9 @@
-<h1>Pipeline Dashboard</h1>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+  <h1 style="margin-bottom: 0;">Pipeline Dashboard</h1>
+  <button id="triggerBtn" class="btn btn-primary" onclick="triggerSend()">Send & Retry Now</button>
+</div>
+
+<div id="triggerResult" class="alert alert-success" style="display: none;"></div>
 
 <div class="stats">
   <div class="stat">
@@ -81,3 +86,33 @@
     </tbody>
   </table>
 <% } %>
+
+<script>
+async function triggerSend() {
+  const btn = document.getElementById('triggerBtn');
+  const result = document.getElementById('triggerResult');
+  btn.disabled = true;
+  btn.textContent = 'Running...';
+  result.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/trigger/send', { method: 'POST' });
+    const data = await res.json();
+    if (res.ok) {
+      result.className = 'alert alert-success';
+      result.textContent = `Done — ${data.sent} queued for send, ${data.retried} retried (${data.dailyUsage} daily usage)`;
+    } else {
+      result.className = 'alert alert-error';
+      result.textContent = data.error || 'Failed';
+    }
+    result.style.display = 'block';
+  } catch (err) {
+    result.className = 'alert alert-error';
+    result.textContent = 'Request failed';
+    result.style.display = 'block';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Send & Retry Now';
+}
+</script>

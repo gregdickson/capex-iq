@@ -6,7 +6,8 @@ import {
   getPromptHistory,
   activatePrompt,
 } from '../db/prompts.js';
-import { getCompanyById, updateCompanyStatus } from '../db/queries.js';
+import { getCompanyById, updateCompanyStatus, getReadyToSend, getSentTodayCount, getRetriableFailures } from '../db/queries.js';
+import { getSettingNumber } from '../db/settings.js';
 import { getQueue, QUEUE_NAMES } from '../queue/setup.js';
 
 const router = Router();
@@ -152,6 +153,69 @@ router.post('/api/retry/:companyId', async (req: Request, res: Response) => {
   });
 
   res.json({ success: true, queue: queueName, companyId });
+});
+
+// --- Manual trigger: GHL send + retry (same as cron) ---
+
+router.post('/api/trigger/send', async (_req: Request, res: Response) => {
+  try {
+    const dailyLimit = await getSettingNumber('daily_send_limit', 150);
+    const sentToday = await getSentTodayCount();
+    const remaining = Math.max(0, dailyLimit - sentToday);
+
+    let sendCount = 0;
+    if (remaining > 0) {
+      const records = await getReadyToSend(remaining);
+      const ghlQueue = getQueue(QUEUE_NAMES.GHL_SEND);
+      for (const record of records) {
+        await ghlQueue.add('ghl-send', {
+          companyId: record.id,
+          runId: record.pipeline_run_id,
+        }, {
+          attempts: 3,
+          backoff: { type: 'exponential', delay: 5000 },
+        });
+        sendCount++;
+      }
+    }
+
+    // Retry failed jobs
+    const statusToQueue: Record<string, string> = {
+      failed_matching: QUEUE_NAMES.MATCHING,
+      failed_qualification: QUEUE_NAMES.QUALIFICATION,
+      failed_email_generation: QUEUE_NAMES.EMAIL_GENERATION,
+      failed_ghl_push: QUEUE_NAMES.GHL_SEND,
+    };
+
+    const failures = await getRetriableFailures(3);
+    let retryCount = 0;
+    for (const record of failures) {
+      const queueName = statusToQueue[record.status];
+      if (!queueName) continue;
+
+      const queue = getQueue(queueName);
+      const jobData: Record<string, any> = {
+        companyId: record.id,
+        runId: record.pipeline_run_id,
+      };
+
+      await updateCompanyStatus(record.id, 'pending', {
+        retry_count: (record.retry_count || 0) + 1,
+        error_log: null,
+      });
+
+      await queue.add('manual-retry', jobData, {
+        attempts: 3,
+        backoff: { type: 'exponential', delay: 5000 },
+      });
+      retryCount++;
+    }
+
+    res.json({ sent: sendCount, retried: retryCount, dailyUsage: `${sentToday + sendCount}/${dailyLimit}` });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ error: message });
+  }
 });
 
 export default router;
