@@ -15,12 +15,20 @@ export async function matchCompany(
   orgName: string,
   env: { SERPAPI_KEY: string; COMPANIES_HOUSE_API_KEY: string; OPENROUTER_API_KEY: string }
 ): Promise<MatchResult> {
+  console.log(`[matching] Starting match for domain=${domain} orgName=${orgName}`);
+
   // Step 1: SerpAPI domain search
   let serpResult;
   try {
     serpResult = await searchDomain(domain, env.SERPAPI_KEY);
+    const count = serpResult?.organic_results?.length || 0;
+    console.log(`[matching] Step 1 (domain search): ${count} results for ${domain}`);
+    if (count > 0) {
+      const top = serpResult!.organic_results![0];
+      console.log(`[matching]   Top result: ${top.title} — ${top.link}`);
+    }
   } catch (err) {
-    console.error(`[matching] SerpAPI domain search failed for ${domain}:`, err);
+    console.error(`[matching] Step 1 FAILED for ${domain}:`, err);
   }
 
   const topResult = serpResult?.organic_results?.[0];
@@ -35,6 +43,7 @@ export async function matchCompany(
         topResult.snippet || '',
         env.SERPAPI_KEY
       );
+      console.log(`[matching] Step 2 (AI mode): ${aiText ? aiText.substring(0, 200) : '(empty)'}`);
 
       if (aiText) {
         // Step 3: LLM extraction of company name from AI mode text
@@ -48,10 +57,13 @@ export async function matchCompany(
         });
 
         companyNameExtracted = extracted.limited_company || null;
+        console.log(`[matching] Step 3 (LLM extract): "${companyNameExtracted}"`);
       }
     } catch (err) {
-      console.error(`[matching] AI mode / LLM extraction failed for ${domain}:`, err);
+      console.error(`[matching] Step 2/3 FAILED for ${domain}:`, err);
     }
+  } else {
+    console.log(`[matching] Step 2 skipped — no top result from domain search`);
   }
 
   // Step 4: SerpAPI Companies House search
@@ -61,8 +73,10 @@ export async function matchCompany(
         companyNameExtracted,
         env.SERPAPI_KEY
       );
+      console.log(`[matching] Step 4 (SERP CH search): "${companyNameExtracted}" → ${companyNumber || 'no match'}`);
 
       if (companyNumber) {
+        console.log(`[matching] MATCHED via serpapi_chain: ${companyNameExtracted} (${companyNumber})`);
         return {
           matched: true,
           companyNumber,
@@ -71,14 +85,18 @@ export async function matchCompany(
         };
       }
     } catch (err) {
-      console.error(`[matching] SerpAPI CH search failed for ${companyNameExtracted}:`, err);
+      console.error(`[matching] Step 4 FAILED for ${companyNameExtracted}:`, err);
     }
+  } else {
+    console.log(`[matching] Step 4 skipped — no company name extracted`);
   }
 
   // Step 5: Fallback — Companies House API direct search by orgName
   try {
     const chResult = await searchCompany(orgName, env.COMPANIES_HOUSE_API_KEY);
+    console.log(`[matching] Step 5 (CH API fallback): "${orgName}" → ${chResult ? `${chResult.companyName} (${chResult.companyNumber})` : 'no match'}`);
     if (chResult) {
+      console.log(`[matching] MATCHED via companies_house_api: ${chResult.companyName} (${chResult.companyNumber})`);
       return {
         matched: true,
         companyNumber: chResult.companyNumber,
@@ -87,9 +105,9 @@ export async function matchCompany(
       };
     }
   } catch (err) {
-    console.error(`[matching] Companies House API fallback failed for ${orgName}:`, err);
+    console.error(`[matching] Step 5 FAILED for ${orgName}:`, err);
   }
 
-  // No match found
+  console.log(`[matching] NO MATCH for domain=${domain} orgName=${orgName}`);
   return { matched: false };
 }
