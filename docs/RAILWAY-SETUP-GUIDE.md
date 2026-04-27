@@ -45,10 +45,13 @@ You need 3 separate services running from the same repo. Railway calls these "se
 This was auto-created in Step 1. Click on it and configure:
 
 1. **Settings** tab:
-   - **Start Command:** `npm run build && npm run start:api`
+   - **Builder:** Nixpacks (default — handles `npm install` and `npm run build` automatically)
+   - **Start Command:** `npm run start:api`
    - **Watch Paths:** leave default (rebuilds on any push)
 2. **Networking** tab:
    - Click **Generate Domain** — this gives you a public URL (e.g., `capexiq-production.up.railway.app`)
+
+> **Note:** Nixpacks is Railway's default builder. It automatically detects Node.js, runs `npm install`, then runs the `build` script from `package.json` during the build phase. You only need to set the **start command** — don't prepend `npm run build &&` because Nixpacks already built it.
 
 ### Service 2: Worker (processes pipeline jobs)
 
@@ -56,7 +59,7 @@ This was auto-created in Step 1. Click on it and configure:
 2. Railway creates a second service from the same repo
 3. Rename it to **Worker** (click the service name)
 4. **Settings** tab:
-   - **Start Command:** `npm run build && npm run start:worker`
+   - **Start Command:** `npm run start:worker`
 5. **Networking** tab:
    - Do NOT generate a domain — the worker doesn't need public access
 
@@ -65,7 +68,7 @@ This was auto-created in Step 1. Click on it and configure:
 1. Click **+ New** → **GitHub Repo** → select `capex-iq` again
 2. Rename to **Cron**
 3. **Settings** tab:
-   - **Start Command:** `npm run build && npm run start:cron`
+   - **Start Command:** `npm run start:cron`
    - **Cron Schedule:** `0 */1 * * *` (every hour) or `0 8 * * *` (once daily at 8am UTC)
    - **Restart Policy:** Do not restart (it runs once and exits)
 
