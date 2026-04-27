@@ -1,0 +1,46 @@
+Analyze the following pre-structured financial data for a UK company and assess its embedded capital allowances opportunity.
+
+Company Details:
+Company Name: {{companyName}}
+Company Number: {{companyNumber}}
+Incorporation Date: {{incorporationDate}}
+Industry: {{sicDescription}} (SIC: {{sicCode}})
+Location: {{location}}
+Company Status: {{companyStatus}}
+
+Current Year Financials:
+Total Assets: {{cTotalAssets}}
+Fixed Assets: {{cFixedAssets}}
+Current Assets: {{cCurrentAssets}}
+Total Liabilities: {{cTotalLiabilities}}
+Equity: {{cEquity}}
+Debt to Equity Ratio: {{cDebtToEquityRatio}}
+Debt to Asset Ratio: {{cDebtToAssetRatio}}
+
+Previous Year Financials:
+Total Assets: {{pTotalAssets}}
+Fixed Assets: {{pFixedAssets}}
+Current Assets: {{pCurrentAssets}}
+Total Liabilities: {{pTotalLiabilities}}
+Equity: {{pEquity}}
+Debt to Equity Ratio: {{pDebtToEquityRatio}}
+Debt to Asset Ratio: {{pDebtToAssetRatio}}
+
+Growth Indicators:
+Assets Growth Rate: {{assetsGrowthRate}}
+Net Assets Growth Rate: {{netAssetsGrowthRate}}
+
+Extracted PPE Data:
+Current PPE: {{currentPPE}}
+Previous PPE: {{previousPPE}}
+Investment Property: {{investmentProperty}}
+Turnover Revenue: {{turnoverRevenue}}
+
+Based on this data, provide your analysis as a JSON object with the following structure:
+- company_analysis: company details and business model type
+- asset_analysis: current year assets and investment activity scoring
+- legal_qualification: qualifying activity, ownership, expenditure evidence, barriers, confidence
+- embedded_ca_assessment: overall score, detailed sub-scores, opportunity estimation with £ ranges, recommendation (HIGH_PRIORITY / INVESTIGATE_FURTHER / LOW_PRIORITY)
+- detailed_findings: positive indicators, risk factors, data quality notes, next steps, specialist review flag
+
+Return ONLY a valid JSON object, no explanatory text.

@@ -1,0 +1,77 @@
+<h1>Run #<%= run.id %> — <%= run.csv_filename || 'Unknown file' %></h1>
+
+<div class="stats">
+  <% for (const s of summary) { %>
+    <div class="stat">
+      <div class="number"><%= s.count %></div>
+      <div class="label"><%= s.status %></div>
+    </div>
+  <% } %>
+</div>
+
+<div class="tabs">
+  <a href="/runs/<%= run.id %>" class="tab <%= statusFilter === 'all' ? 'active' : '' %>">All (<%= total %>)</a>
+  <% const statuses = ['pending','matching','matched','qualifying','scored','generating_emails','ready_to_send','sent','no_match','filtered','duplicate','failed_matching','failed_qualification','failed_email_generation','failed_ghl_push']; %>
+  <% for (const s of summary) { %>
+    <a href="/runs/<%= run.id %>?status=<%= s.status %>" class="tab <%= statusFilter === s.status ? 'active' : '' %>"><%= s.status %> (<%= s.count %>)</a>
+  <% } %>
+</div>
+
+<% if (companies.length === 0) { %>
+  <div class="card">
+    <p class="text-muted">No records match this filter.</p>
+  </div>
+<% } else { %>
+  <table>
+    <thead>
+      <tr>
+        <th>Domain</th>
+        <th>Contact</th>
+        <th>Org</th>
+        <th>Status</th>
+        <th>Score</th>
+        <th>Opportunity</th>
+        <th>Company #</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for (const c of companies) { %>
+        <tr>
+          <td class="mono" style="font-size:0.75rem"><%= c.domain %></td>
+          <td>
+            <%= c.contact_first_name || '' %> <%= c.contact_last_name || '' %>
+            <% if (c.contact_position) { %><br><span class="text-muted" style="font-size:0.75rem"><%= c.contact_position %></span><% } %>
+          </td>
+          <td><%= c.org_name || '—' %></td>
+          <td>
+            <% const badgeClass = c.status === 'sent' ? 'badge-green' : c.status === 'ready_to_send' ? 'badge-blue' : c.status.startsWith('failed') ? 'badge-red' : c.status === 'filtered' || c.status === 'duplicate' || c.status === 'no_match' ? 'badge-gray' : 'badge-yellow'; %>
+            <span class="badge <%= badgeClass %>"><%= c.status %></span>
+          </td>
+          <td><%= c.capexiq_score != null ? c.capexiq_score : '—' %></td>
+          <td style="font-size:0.75rem"><%= c.opportunity_value || '—' %></td>
+          <td class="mono" style="font-size:0.75rem"><%= c.company_number || '—' %></td>
+          <td>
+            <% if (c.status.startsWith('failed')) { %>
+              <form action="/api/retry/<%= c.id %>" method="POST" style="display:inline">
+                <button type="submit" class="btn btn-primary btn-sm">Retry</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+
+  <% if (totalPages > 1) { %>
+    <div style="margin-top:1rem; display:flex; gap:0.5rem; align-items:center;">
+      <% if (currentPage > 1) { %>
+        <a href="/runs/<%= run.id %>?<%= statusFilter !== 'all' ? 'status=' + statusFilter + '&' : '' %>page=<%= currentPage - 1 %>" class="btn btn-sm btn-primary">Prev</a>
+      <% } %>
+      <span class="text-muted" style="font-size:0.8rem">Page <%= currentPage %> of <%= totalPages %></span>
+      <% if (currentPage < totalPages) { %>
+        <a href="/runs/<%= run.id %>?<%= statusFilter !== 'all' ? 'status=' + statusFilter + '&' : '' %>page=<%= currentPage + 1 %>" class="btn btn-sm btn-primary">Next</a>
+      <% } %>
+    </div>
+  <% } %>
+<% } %>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CapexIQ — <%= typeof title !== 'undefined' ? title : 'Dashboard' %></title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; color: #1a1a2e; line-height: 1.6; }
+    nav { background: #1a1a2e; padding: 0.75rem 1.5rem; display: flex; gap: 1.5rem; align-items: center; }
+    nav a { color: #a0aec0; text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+    nav a:hover, nav a.active { color: #fff; }
+    nav .brand { color: #fff; font-weight: 700; font-size: 1.1rem; margin-right: 1rem; }
+    .container { max-width: 1200px; margin: 1.5rem auto; padding: 0 1.5rem; }
+    h1 { font-size: 1.5rem; margin-bottom: 1rem; }
+    h2 { font-size: 1.2rem; margin-bottom: 0.75rem; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    th, td { padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid #edf2f7; font-size: 0.85rem; }
+    th { background: #f7fafc; font-weight: 600; color: #4a5568; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+    tr:hover { background: #f7fafc; }
+    .card { background: #fff; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1rem; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+    .stat { background: #fff; border-radius: 8px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center; }
+    .stat .number { font-size: 1.8rem; font-weight: 700; color: #1a1a2e; }
+    .stat .label { font-size: 0.75rem; color: #718096; text-transform: uppercase; letter-spacing: 0.05em; }
+    .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+    .badge-green { background: #c6f6d5; color: #22543d; }
+    .badge-yellow { background: #fefcbf; color: #744210; }
+    .badge-red { background: #fed7d7; color: #822727; }
+    .badge-blue { background: #bee3f8; color: #2a4365; }
+    .badge-gray { background: #e2e8f0; color: #4a5568; }
+    .btn { display: inline-block; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500; text-decoration: none; cursor: pointer; border: none; }
+    .btn-primary { background: #3182ce; color: #fff; }
+    .btn-primary:hover { background: #2b6cb0; }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+    form .field { margin-bottom: 1rem; }
+    form label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem; color: #4a5568; }
+    form input, form textarea, form select { width: 100%; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.9rem; font-family: inherit; }
+    form textarea { min-height: 200px; font-family: 'Menlo', 'Monaco', monospace; font-size: 0.8rem; }
+    .alert { padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.85rem; }
+    .alert-success { background: #c6f6d5; color: #22543d; }
+    .alert-error { background: #fed7d7; color: #822727; }
+    .tabs { display: flex; gap: 0.25rem; margin-bottom: 1rem; }
+    .tab { padding: 0.4rem 0.8rem; border-radius: 6px 6px 0 0; font-size: 0.85rem; text-decoration: none; color: #718096; background: #edf2f7; }
+    .tab.active { background: #fff; color: #1a1a2e; font-weight: 600; }
+    .mono { font-family: 'Menlo', 'Monaco', monospace; font-size: 0.8rem; }
+    .text-muted { color: #a0aec0; }
+    .mt-1 { margin-top: 0.5rem; }
+    .mb-1 { margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body>
+  <nav>
+    <span class="brand">CapexIQ</span>
+    <a href="/" class="<%= typeof page !== 'undefined' && page === 'dashboard' ? 'active' : '' %>">Dashboard</a>
+    <a href="/upload" class="<%= typeof page !== 'undefined' && page === 'upload' ? 'active' : '' %>">Upload</a>
+    <a href="/failures" class="<%= typeof page !== 'undefined' && page === 'failures' ? 'active' : '' %>">Failures</a>
+    <a href="/settings" class="<%= typeof page !== 'undefined' && page === 'settings' ? 'active' : '' %>">Settings</a>
+    <a href="/prompts" class="<%= typeof page !== 'undefined' && page === 'prompts' ? 'active' : '' %>">Prompts</a>
+  </nav>
+  <div class="container">
+    <%- body %>
+  </div>
+</body>
+</html>

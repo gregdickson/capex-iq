@@ -1,0 +1,82 @@
+<h1>Pipeline Settings</h1>
+
+<% if (typeof message !== 'undefined' && message) { %>
+  <div class="alert alert-success"><%= message %></div>
+<% } %>
+
+<form action="/settings" method="POST">
+  <div class="card">
+    <h2>Processing</h2>
+    <div class="field">
+      <label for="daily_send_limit">Daily GHL Send Limit</label>
+      <input type="number" name="daily_send_limit" id="daily_send_limit" value="<%= settings.daily_send_limit?.value || '150' %>" min="1" max="10000">
+      <small class="text-muted">Max contacts pushed to GoHighLevel per day</small>
+    </div>
+    <div class="field">
+      <label for="ai_validation_threshold">AI Validation Threshold</label>
+      <input type="number" name="ai_validation_threshold" id="ai_validation_threshold" value="<%= settings.ai_validation_threshold?.value || '55' %>" min="0" max="100">
+      <small class="text-muted">CapexIQ score above which AI validation runs (0-100)</small>
+    </div>
+    <div class="field">
+      <label for="reprocess_window_days">Reprocess Window (days)</label>
+      <input type="number" name="reprocess_window_days" id="reprocess_window_days" value="<%= settings.reprocess_window_days?.value || '90' %>" min="1">
+      <small class="text-muted">Days before a domain can be reprocessed</small>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Rate Limits</h2>
+    <div class="field">
+      <label for="matching_rate_limit_ms">Matching Rate (ms)</label>
+      <input type="number" name="matching_rate_limit_ms" id="matching_rate_limit_ms" value="<%= settings.matching_rate_limit_ms?.value || '3000' %>" min="500">
+      <small class="text-muted">Milliseconds between matching jobs (SerpAPI calls)</small>
+    </div>
+    <div class="field">
+      <label for="qualification_rate_limit_ms">Qualification Rate (ms)</label>
+      <input type="number" name="qualification_rate_limit_ms" id="qualification_rate_limit_ms" value="<%= settings.qualification_rate_limit_ms?.value || '2500' %>" min="500">
+      <small class="text-muted">Milliseconds between qualification jobs (DataLedger calls)</small>
+    </div>
+    <div class="field">
+      <label for="email_generation_rate_limit_ms">Email Generation Rate (ms)</label>
+      <input type="number" name="email_generation_rate_limit_ms" id="email_generation_rate_limit_ms" value="<%= settings.email_generation_rate_limit_ms?.value || '10000' %>" min="1000">
+      <small class="text-muted">Milliseconds between email generation jobs (LLM calls)</small>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>LLM Models</h2>
+    <div class="field">
+      <label for="model_entity_extraction">Entity Extraction Model</label>
+      <input type="text" name="model_entity_extraction" id="model_entity_extraction" value="<%= settings.model_entity_extraction?.value || 'openai/gpt-4o-mini' %>">
+      <small class="text-muted">OpenRouter model for company name extraction</small>
+    </div>
+    <div class="field">
+      <label for="model_ca_analysis">CA Analysis Model</label>
+      <input type="text" name="model_ca_analysis" id="model_ca_analysis" value="<%= settings.model_ca_analysis?.value || 'moonshotai/kimi-k2.5' %>">
+      <small class="text-muted">OpenRouter model for CA validation</small>
+    </div>
+    <div class="field">
+      <label for="model_email_generation">Email Generation Model</label>
+      <input type="text" name="model_email_generation" id="model_email_generation" value="<%= settings.model_email_generation?.value || 'anthropic/claude-sonnet-4-20250514' %>">
+      <small class="text-muted">OpenRouter model for email sequences</small>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Notifications</h2>
+    <div class="field">
+      <label for="webhook_url">Webhook URL</label>
+      <input type="url" name="webhook_url" id="webhook_url" value="<%= settings.webhook_url?.value || '' %>" placeholder="https://hooks.slack.com/...">
+      <small class="text-muted">URL for daily summary and failure alert notifications</small>
+    </div>
+    <div class="field">
+      <label for="webhook_enabled">Webhook Enabled</label>
+      <select name="webhook_enabled" id="webhook_enabled">
+        <option value="true" <%= settings.webhook_enabled?.value === 'true' ? 'selected' : '' %>>Enabled</option>
+        <option value="false" <%= settings.webhook_enabled?.value !== 'true' ? 'selected' : '' %>>Disabled</option>
+      </select>
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Save Settings</button>
+</form>

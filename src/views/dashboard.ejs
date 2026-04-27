@@ -1,0 +1,65 @@
+<h1>Pipeline Dashboard</h1>
+
+<div class="stats">
+  <div class="stat">
+    <div class="number"><%= sentToday %> / <%= dailyLimit %></div>
+    <div class="label">Sent Today</div>
+  </div>
+  <div class="stat">
+    <div class="number"><%= runs.reduce((s, r) => s + (r.ready_to_send || 0), 0) %></div>
+    <div class="label">Ready to Send</div>
+  </div>
+  <div class="stat">
+    <div class="number"><%= runs.reduce((s, r) => s + (r.failed || 0), 0) %></div>
+    <div class="label">Total Failed</div>
+  </div>
+  <div class="stat">
+    <div class="number"><%= runs.length %></div>
+    <div class="label">Pipeline Runs</div>
+  </div>
+</div>
+
+<% if (runs.length === 0) { %>
+  <div class="card">
+    <p class="text-muted">No pipeline runs yet. <a href="/upload">Upload a CSV</a> to get started.</p>
+  </div>
+<% } else { %>
+  <table>
+    <thead>
+      <tr>
+        <th>Run</th>
+        <th>File</th>
+        <th>Total</th>
+        <th>After Filter</th>
+        <th>Matched</th>
+        <th>No Match</th>
+        <th>Scored</th>
+        <th>AI Validated</th>
+        <th>Emails</th>
+        <th>Ready</th>
+        <th>Sent</th>
+        <th>Failed</th>
+        <th>Started</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for (const run of runs) { %>
+        <tr>
+          <td><a href="/runs/<%= run.id %>">#<%= run.id %></a></td>
+          <td><%= run.csv_filename || '—' %></td>
+          <td><%= run.total_records %></td>
+          <td><%= run.after_filter %></td>
+          <td><%= run.matched %></td>
+          <td><%= run.no_match %></td>
+          <td><%= run.qualified %></td>
+          <td><%= run.ai_validated %></td>
+          <td><%= run.emails_generated %></td>
+          <td><span class="badge badge-blue"><%= run.ready_to_send %></span></td>
+          <td><span class="badge badge-green"><%= run.sent %></span></td>
+          <td><% if (run.failed > 0) { %><span class="badge badge-red"><%= run.failed %></span><% } else { %>0<% } %></td>
+          <td class="mono text-muted"><%= new Date(run.started_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) %></td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+<% } %>

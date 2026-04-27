@@ -1,0 +1,19 @@
+<h1>Upload CSV</h1>
+
+<% if (typeof message !== 'undefined' && message) { %>
+  <div class="alert alert-<%= messageType || 'success' %>"><%= message %></div>
+<% } %>
+
+<div class="card">
+  <form action="/upload" method="POST" enctype="multipart/form-data">
+    <div class="field">
+      <label for="csv">Select Apify CSV export</label>
+      <input type="file" name="csv" id="csv" accept=".csv" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Upload & Process</button>
+  </form>
+  <p class="text-muted mt-1" style="font-size: 0.8rem;">
+    Expected format: Apify lead-scraper-apollo-zoominfo-lusha CSV export.
+    Records will be filtered, deduped, and fed into the qualification pipeline.
+  </p>
+</div>

@@ -1,0 +1,30 @@
+Generate a 5-email outreach drip sequence for a UK capital allowances consultancy targeting the following prospect. We want to show that we have done research into the company's financials and what type of capital allowance claims they may be able to make.
+
+Prospect Context
+- Contact first name: {{contactFirstName}}
+- Company: {{companyName}}
+- Industry: {{sicDescription}}
+- SIC classification: {{sicCode}}
+- Estimated opportunity value: {{opportunityValue}}
+- CapexIQ score band: {{scoreBand}} ({{score}}/100)
+- Location: {{location}}
+- Key indicators: {{indicators}}
+- Total assets: £{{totalAssets}}
+- Fixed assets: £{{fixedAssets}}
+{{caContext}}
+
+Email Sequence Structure
+1. Email 1 — Awareness (Day 0): Introduce capital allowances as an overlooked tax relief. Mention that many UK businesses miss embedded allowances in their commercial property. Keep it short (3-4 sentences) and end with a soft question.
+2. Email 2 — Relevance (Day 3): Connect capital allowances specifically to their industry and financial data. Reference the type of fixtures and plant/machinery typical in their sector. Show you understand their business.
+3. Email 3 — Proof (Day 7): Include a brief anonymised case study or typical numbers for their industry. E.g., "A similar [industry] business recovered £X in tax relief from embedded fixtures." Build credibility.
+4. Email 4 — Ease (Day 12): Explain how the process works — non-intrusive survey, HMRC-compliant claim, no upfront cost (success-fee basis). Remove friction and objections.
+5. Email 5 — Urgency (Day 18): Final call-to-action. Mention time-sensitivity (tax year deadlines, unclaimed allowances depreciating). Offer a specific next step (15-minute call or free desk-based assessment via CapEx Check).
+
+Tone & Style Rules
+- Professional but warm, not pushy or salesy
+- UK English spelling throughout
+- First-name basis with the contact
+- Short paragraphs (2-3 sentences max)
+- Each email should be 80-150 words in the body
+- Subject lines: 5-8 words, no clickbait
+- Do NOT use the word "synergy" or corporate jargon

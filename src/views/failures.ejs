@@ -1,0 +1,63 @@
+<h1>Failed Records</h1>
+
+<% if (companies.length === 0) { %>
+  <div class="card">
+    <p class="text-muted">No failed records. Everything is running smoothly.</p>
+  </div>
+<% } else { %>
+  <p class="text-muted mb-1"><%= total %> failed record<%= total !== 1 ? 's' : '' %> across all runs</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Domain</th>
+        <th>Contact</th>
+        <th>Org</th>
+        <th>Status</th>
+        <th>Error</th>
+        <th>Retries</th>
+        <th>Run</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for (const c of companies) { %>
+        <tr>
+          <td class="mono" style="font-size:0.75rem"><%= c.domain %></td>
+          <td><%= c.contact_first_name || '' %> <%= c.contact_last_name || '' %></td>
+          <td><%= c.org_name || '—' %></td>
+          <td><span class="badge badge-red"><%= c.status %></span></td>
+          <td style="max-width:300px; font-size:0.75rem; word-break:break-word;">
+            <% if (c.error_log) {
+              const errLog = typeof c.error_log === 'string' ? JSON.parse(c.error_log) : c.error_log;
+            %>
+              <strong><%= errLog.stage || '' %></strong>: <%= errLog.message || 'Unknown error' %>
+              <br><span class="text-muted">Attempt <%= errLog.attempt || '?' %> — <%= errLog.timestamp ? new Date(errLog.timestamp).toLocaleString('en-GB') : '' %></span>
+            <% } else { %>
+              <span class="text-muted">No error details</span>
+            <% } %>
+          </td>
+          <td><%= c.retry_count || 0 %></td>
+          <td><a href="/runs/<%= c.pipeline_run_id %>">#<%= c.pipeline_run_id %></a></td>
+          <td>
+            <form action="/api/retry/<%= c.id %>" method="POST" style="display:inline">
+              <button type="submit" class="btn btn-primary btn-sm">Retry</button>
+            </form>
+          </td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+
+  <% if (totalPages > 1) { %>
+    <div style="margin-top:1rem; display:flex; gap:0.5rem; align-items:center;">
+      <% if (currentPage > 1) { %>
+        <a href="/failures?page=<%= currentPage - 1 %>" class="btn btn-sm btn-primary">Prev</a>
+      <% } %>
+      <span class="text-muted" style="font-size:0.8rem">Page <%= currentPage %> of <%= totalPages %></span>
+      <% if (currentPage < totalPages) { %>
+        <a href="/failures?page=<%= currentPage + 1 %>" class="btn btn-sm btn-primary">Next</a>
+      <% } %>
+    </div>
+  <% } %>
+<% } %>
