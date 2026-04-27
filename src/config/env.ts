@@ -17,23 +17,23 @@ const apiKeysSchema = z.object({
 });
 
 const ghlSchema = z.object({
-  GHL_PRIVATE_TOKEN: z.string().min(1),
-  GHL_LOCATION_ID: z.string().min(1),
-  GHL_CUSTOM_FIELD_EMAIL_1_SUBJECT: z.string().min(1),
-  GHL_CUSTOM_FIELD_EMAIL_1_BODY: z.string().min(1),
-  GHL_CUSTOM_FIELD_EMAIL_1_PREHEADER: z.string().min(1),
-  GHL_CUSTOM_FIELD_EMAIL_2_SUBJECT: z.string().min(1),
-  GHL_CUSTOM_FIELD_EMAIL_2_BODY: z.string().min(1),
-  GHL_CUSTOM_FIELD_EMAIL_2_PREHEADER: z.string().min(1),
-  GHL_CUSTOM_FIELD_EMAIL_3_SUBJECT: z.string().min(1),
-  GHL_CUSTOM_FIELD_EMAIL_3_BODY: z.string().min(1),
-  GHL_CUSTOM_FIELD_EMAIL_3_PREHEADER: z.string().min(1),
-  GHL_CUSTOM_FIELD_EMAIL_4_SUBJECT: z.string().min(1),
-  GHL_CUSTOM_FIELD_EMAIL_4_BODY: z.string().min(1),
-  GHL_CUSTOM_FIELD_EMAIL_4_PREHEADER: z.string().min(1),
-  GHL_CUSTOM_FIELD_EMAIL_5_SUBJECT: z.string().min(1),
-  GHL_CUSTOM_FIELD_EMAIL_5_BODY: z.string().min(1),
-  GHL_CUSTOM_FIELD_EMAIL_5_PREHEADER: z.string().min(1),
+  GHL_PRIVATE_TOKEN: z.string().default(''),
+  GHL_LOCATION_ID: z.string().default(''),
+  GHL_CUSTOM_FIELD_EMAIL_1_SUBJECT: z.string().default(''),
+  GHL_CUSTOM_FIELD_EMAIL_1_BODY: z.string().default(''),
+  GHL_CUSTOM_FIELD_EMAIL_1_PREHEADER: z.string().default(''),
+  GHL_CUSTOM_FIELD_EMAIL_2_SUBJECT: z.string().default(''),
+  GHL_CUSTOM_FIELD_EMAIL_2_BODY: z.string().default(''),
+  GHL_CUSTOM_FIELD_EMAIL_2_PREHEADER: z.string().default(''),
+  GHL_CUSTOM_FIELD_EMAIL_3_SUBJECT: z.string().default(''),
+  GHL_CUSTOM_FIELD_EMAIL_3_BODY: z.string().default(''),
+  GHL_CUSTOM_FIELD_EMAIL_3_PREHEADER: z.string().default(''),
+  GHL_CUSTOM_FIELD_EMAIL_4_SUBJECT: z.string().default(''),
+  GHL_CUSTOM_FIELD_EMAIL_4_BODY: z.string().default(''),
+  GHL_CUSTOM_FIELD_EMAIL_4_PREHEADER: z.string().default(''),
+  GHL_CUSTOM_FIELD_EMAIL_5_SUBJECT: z.string().default(''),
+  GHL_CUSTOM_FIELD_EMAIL_5_BODY: z.string().default(''),
+  GHL_CUSTOM_FIELD_EMAIL_5_PREHEADER: z.string().default(''),
 });
 
 const apiSchema = baseSchema.extend({
@@ -43,7 +43,7 @@ const apiSchema = baseSchema.extend({
 
 const workerSchema = baseSchema.merge(apiKeysSchema).merge(ghlSchema);
 
-const cronSchema = baseSchema.merge(ghlSchema).merge(apiKeysSchema);
+const cronSchema = baseSchema.merge(ghlSchema);
 
 type ApiEnv = z.infer<typeof apiSchema>;
 type WorkerEnv = z.infer<typeof workerSchema>;

@@ -14,6 +14,10 @@ export async function handleGHLSend(
   const { companyId, runId } = job.data;
 
   try {
+    if (!env.GHL_PRIVATE_TOKEN || !env.GHL_LOCATION_ID) {
+      throw new Error('GHL not configured — set GHL_PRIVATE_TOKEN and GHL_LOCATION_ID to enable sending');
+    }
+
     const company = await getCompanyById(companyId);
     if (!company) throw new Error(`Company ${companyId} not found`);
 
