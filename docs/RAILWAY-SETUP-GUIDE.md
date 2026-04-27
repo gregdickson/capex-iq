@@ -108,13 +108,12 @@ GHL_CUSTOM_FIELD_EMAIL_4_PREHEADER=field_id_here
 GHL_CUSTOM_FIELD_EMAIL_5_SUBJECT=field_id_here
 GHL_CUSTOM_FIELD_EMAIL_5_BODY=field_id_here
 GHL_CUSTOM_FIELD_EMAIL_5_PREHEADER=field_id_here
-PORT=3000
 NODE_ENV=production
 ```
 
 **Important notes:**
 - `${{Postgres.DATABASE_URL}}` and `${{Redis.REDIS_URL}}` are Railway reference variables — they auto-resolve to the real connection strings. Use this exact syntax.
-- The `PORT` variable is only needed on the API service. Railway auto-assigns ports but the app listens on 3000.
+- **Do NOT set `PORT`** — Railway injects its own `PORT` env var automatically (usually 8080). The app reads it from the environment. Setting it manually can cause a mismatch with Railway's networking.
 
 3. **Copy the same variables** to the Worker and Cron services:
    - Click Worker → Variables → Raw Editor → paste the same block
