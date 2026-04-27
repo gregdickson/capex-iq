@@ -9,20 +9,28 @@ import {
   getSentTodayCount,
 } from '../db/queries.js';
 import { getSetting } from '../db/settings.js';
+import { getQueueStats } from '../queue/setup.js';
 
 const router = Router();
 
 // Dashboard — pipeline runs overview
 router.get('/', async (_req: Request, res: Response) => {
-  const runs = await getPipelineRuns();
-  const sentToday = await getSentTodayCount();
-  const dailyLimit = await getSetting('daily_send_limit') || '150';
+  const [runs, sentToday, dailyLimitStr, queueStats] = await Promise.all([
+    getPipelineRuns(),
+    getSentTodayCount(),
+    getSetting('daily_send_limit'),
+    getQueueStats(),
+  ]);
+  const dailyLimit = parseInt(dailyLimitStr || '150', 10);
+  const totalQueued = Object.values(queueStats).reduce((s, q) => s + q.waiting + q.active, 0);
   res.render('dashboard', {
     page: 'dashboard',
     title: 'Dashboard',
     runs,
     sentToday,
-    dailyLimit: parseInt(dailyLimit, 10),
+    dailyLimit,
+    queueStats,
+    totalQueued,
   });
 });
 

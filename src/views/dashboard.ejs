@@ -19,6 +19,24 @@
   </div>
 </div>
 
+<% if (totalQueued > 0) { %>
+  <div class="card" style="margin-bottom: 1rem;">
+    <h2 style="margin-bottom: 0.5rem;">Queue Activity</h2>
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+      <% for (const [name, stats] of Object.entries(queueStats)) { %>
+        <% if (stats.waiting > 0 || stats.active > 0 || stats.failed > 0) { %>
+          <div style="font-size: 0.85rem;">
+            <strong><%= name %></strong>:
+            <% if (stats.active > 0) { %><span class="badge badge-yellow">processing <%= stats.active %></span><% } %>
+            <% if (stats.waiting > 0) { %><span class="badge badge-blue">waiting <%= stats.waiting %></span><% } %>
+            <% if (stats.failed > 0) { %><span class="badge badge-red">failed <%= stats.failed %></span><% } %>
+          </div>
+        <% } %>
+      <% } %>
+    </div>
+  </div>
+<% } %>
+
 <% if (runs.length === 0) { %>
   <div class="card">
     <p class="text-muted">No pipeline runs yet. <a href="/upload">Upload a CSV</a> to get started.</p>
