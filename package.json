@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp -r src/db/migrations dist/db/migrations",
     "start:api": "node dist/index.js",
     "start:worker": "node dist/worker.js",
     "start:cron": "node dist/cron.js",

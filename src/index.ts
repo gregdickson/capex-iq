@@ -18,7 +18,8 @@ const app = express();
 
 // EJS setup
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+// EJS views live in src/, not dist/ — they aren't compiled by TypeScript
+app.set('views', path.join(__dirname, '..', 'src', 'views'));
 app.set('layout', 'layout');
 app.use(ejsLayouts);
 
