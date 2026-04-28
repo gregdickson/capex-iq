@@ -156,15 +156,26 @@ Return your output as structured JSON matching the required schema exactly.${rag
    - Subject lines: 5-8 words, no clickbait
    - Do NOT use the word "synergy" or corporate jargon`;
 
-  const result = await completeJSON<{ email_sequence: EmailSequenceItem[] }>({
+  const result = await completeJSON<Record<string, any>>({
     model,
     systemPrompt: systemPrompt?.content || defaultSystem,
     userPrompt: userPromptTemplate?.content || defaultUser,
     apiKey: env.OPENROUTER_API_KEY,
   });
 
+  // The model may return the array under different keys — find it robustly
+  const emails: EmailSequenceItem[] =
+    result.email_sequence ||
+    result.emails ||
+    result.sequence ||
+    (Array.isArray(result) ? result : null);
+
+  if (!emails || !Array.isArray(emails) || emails.length === 0) {
+    throw new Error(`Model returned unexpected email structure: ${JSON.stringify(Object.keys(result))}`);
+  }
+
   return {
-    emails: result.email_sequence,
+    emails,
     promptVersionId: systemPrompt?.id || null,
   };
 }
