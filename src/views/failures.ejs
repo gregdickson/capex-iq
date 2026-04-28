@@ -23,7 +23,7 @@
     <tbody>
       <% for (const c of companies) { %>
         <tr>
-          <td class="mono" style="font-size:0.75rem"><%= c.domain %></td>
+          <td class="mono" style="font-size:0.75rem"><a href="/companies/<%= c.id %>"><%= c.domain %></a></td>
           <td><%= c.contact_first_name || '' %> <%= c.contact_last_name || '' %></td>
           <td><%= c.org_name || '—' %></td>
           <td><span class="badge badge-red"><%= c.status %></span></td>

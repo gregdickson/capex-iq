@@ -1,0 +1,88 @@
+<p class="text-muted mb-1"><a href="/runs/<%= company.pipeline_run_id %>">&larr; Back to Run #<%= company.pipeline_run_id %></a></p>
+
+<h1><%= company.company_name || company.org_name || company.domain %></h1>
+
+<div class="stats">
+  <div class="stat">
+    <div class="number"><%= company.capexiq_score != null ? company.capexiq_score : '—' %></div>
+    <div class="label">CapexIQ Score</div>
+  </div>
+  <div class="stat">
+    <div class="number" style="font-size:1rem"><%= company.opportunity_value || '—' %></div>
+    <div class="label">Opportunity</div>
+  </div>
+  <div class="stat">
+    <div class="number">
+      <% const badgeClass = company.status === 'sent' ? 'badge-green' : company.status === 'ready_to_send' ? 'badge-blue' : company.status.startsWith('failed') ? 'badge-red' : 'badge-yellow'; %>
+      <span class="badge <%= badgeClass %>" style="font-size:0.9rem"><%= company.status %></span>
+    </div>
+    <div class="label">Status</div>
+  </div>
+  <div class="stat">
+    <div class="number" style="font-size:1rem"><%= company.ghl_contact_id || '—' %></div>
+    <div class="label">GHL Contact ID</div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
+  <div class="card">
+    <h2>Company Info</h2>
+    <table style="box-shadow:none">
+      <tr><td style="font-weight:600; width:40%">Domain</td><td class="mono"><%= company.domain || '—' %></td></tr>
+      <tr><td style="font-weight:600">Company #</td><td class="mono"><%= company.company_number || '—' %></td></tr>
+      <tr><td style="font-weight:600">SIC</td><td><%= company.sic_description || company.sic_code || '—' %></td></tr>
+      <tr><td style="font-weight:600">Location</td><td><%= company.location || '—' %></td></tr>
+      <tr><td style="font-weight:600">Org</td><td><%= company.org_name || '—' %></td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h2>Contact</h2>
+    <table style="box-shadow:none">
+      <tr><td style="font-weight:600; width:40%">Name</td><td><%= company.contact_first_name || '' %> <%= company.contact_last_name || '' %></td></tr>
+      <tr><td style="font-weight:600">Email</td><td class="mono" style="font-size:0.8rem"><%= company.contact_email || '—' %></td></tr>
+      <tr><td style="font-weight:600">Position</td><td><%= company.contact_position || '—' %></td></tr>
+      <tr><td style="font-weight:600">LinkedIn</td><td><% if (company.contact_linkedin) { %><a href="<%= company.contact_linkedin %>" target="_blank">Profile</a><% } else { %>—<% } %></td></tr>
+      <tr><td style="font-weight:600">Sent At</td><td><%= company.sent_at ? new Date(company.sent_at).toLocaleString('en-GB') : '—' %></td></tr>
+    </table>
+  </div>
+</div>
+
+<% if (company.status.startsWith('failed')) { %>
+  <div class="alert alert-error" style="margin-bottom:1rem">
+    <% if (company.error_log) {
+      const errLog = typeof company.error_log === 'string' ? JSON.parse(company.error_log) : company.error_log;
+    %>
+      <strong><%= errLog.stage || '' %></strong>: <%= errLog.message || 'Unknown error' %>
+      <br><span class="text-muted">Attempt <%= errLog.attempt || '?' %> — <%= errLog.timestamp ? new Date(errLog.timestamp).toLocaleString('en-GB') : '' %></span>
+    <% } %>
+    <form action="/api/retry/<%= company.id %>" method="POST" style="display:inline; margin-left:1rem;">
+      <button type="submit" class="btn btn-primary btn-sm">Retry</button>
+    </form>
+  </div>
+<% } %>
+
+<h2>Generated Emails (<%= emails.length %>)</h2>
+
+<% if (emails.length === 0) { %>
+  <div class="card">
+    <p class="text-muted">No emails generated yet.</p>
+  </div>
+<% } else { %>
+  <% for (let i = 0; i < emails.length; i++) { const e = emails[i]; %>
+    <div class="card" style="margin-bottom:0.75rem">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+        <h2 style="margin-bottom:0">Email <%= e.email_number || (i + 1) %><% if (e.purpose) { %> — <%= e.purpose %><% } %></h2>
+        <% if (e.send_delay_days != null) { %>
+          <span class="badge badge-gray">Day <%= e.send_delay_days %></span>
+        <% } %>
+      </div>
+      <table style="box-shadow:none; margin-bottom:0.5rem">
+        <tr><td style="font-weight:600; width:100px">Subject</td><td><%= e.subject %></td></tr>
+        <% if (e.preheader) { %>
+          <tr><td style="font-weight:600">Preheader</td><td class="text-muted"><%= e.preheader %></td></tr>
+        <% } %>
+      </table>
+      <div style="background:#f7fafc; border-radius:6px; padding:1rem; font-size:0.85rem; white-space:pre-wrap; line-height:1.7;"><%= e.body %></div>
+    </div>
+  <% } %>
+<% } %>

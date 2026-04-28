@@ -100,8 +100,10 @@ router.post('/api/retry/:companyId', async (req: Request, res: Response) => {
   };
 
   const queueName = statusToQueue[company.status];
+  const referer = req.headers.referer || `/runs/${company.pipeline_run_id}`;
   if (!queueName) {
-    res.status(400).json({ error: `Cannot retry status: ${company.status}` });
+    // Redirect back with error flash via query param
+    res.redirect(`${referer}${referer.includes('?') ? '&' : '?'}error=${encodeURIComponent(`Cannot retry status: ${company.status}`)}`);
     return;
   }
 
@@ -152,7 +154,7 @@ router.post('/api/retry/:companyId', async (req: Request, res: Response) => {
     backoff: { type: 'exponential', delay: 5000 },
   });
 
-  res.json({ success: true, queue: queueName, companyId });
+  res.redirect(referer);
 });
 
 // --- Manual trigger: GHL send + retry (same as cron) ---
@@ -211,10 +213,12 @@ router.post('/api/trigger/send', async (_req: Request, res: Response) => {
       retryCount++;
     }
 
-    res.json({ sent: sendCount, retried: retryCount, dailyUsage: `${sentToday + sendCount}/${dailyLimit}` });
+    const referer = _req.headers.referer || '/';
+    res.redirect(`${referer}${referer.includes('?') ? '&' : '?'}sent=${sendCount}&retried=${retryCount}`);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    res.status(500).json({ error: message });
+    const referer = _req.headers.referer || '/';
+    res.redirect(`${referer}${referer.includes('?') ? '&' : '?'}error=${encodeURIComponent(message)}`);
   }
 });
 

@@ -58,6 +58,7 @@ router.get('/runs/:id', async (req: Request, res: Response) => {
     pageSize,
     statusFilter: statusFilter || 'all',
     totalPages: Math.ceil(total / pageSize),
+    error: req.query.error || null,
   });
 });
 
@@ -77,7 +78,33 @@ router.get('/failures', async (req: Request, res: Response) => {
   });
 });
 
-// Company detail (JSON API for debugging)
+// Company detail page
+router.get('/companies/:id', async (req: Request, res: Response) => {
+  const id = parseInt(String(req.params.id), 10);
+  if (isNaN(id)) { res.status(400).send('Invalid ID'); return; }
+
+  const company = await getCompanyById(id);
+  if (!company) { res.status(404).send('Company not found'); return; }
+
+  // Parse email_sequence if stored as string
+  let emails: any[] = [];
+  if (company.email_sequence) {
+    try {
+      emails = typeof company.email_sequence === 'string'
+        ? JSON.parse(company.email_sequence)
+        : company.email_sequence;
+    } catch { /* ignore parse errors */ }
+  }
+
+  res.render('company-detail', {
+    page: 'dashboard',
+    title: `${company.company_name || company.org_name || company.domain}`,
+    company,
+    emails,
+  });
+});
+
+// Company detail JSON API (for debugging)
 router.get('/api/companies/:id', async (req: Request, res: Response) => {
   const id = parseInt(String(req.params.id), 10);
   if (isNaN(id)) { res.status(400).json({ error: 'Invalid ID' }); return; }

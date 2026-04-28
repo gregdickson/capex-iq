@@ -1,5 +1,9 @@
 <h1>Run #<%= run.id %> — <%= run.csv_filename || 'Unknown file' %></h1>
 
+<% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert alert-error"><%= error %></div>
+<% } %>
+
 <div class="stats">
   <% for (const s of summary) { %>
     <div class="stat">
@@ -38,7 +42,7 @@
     <tbody>
       <% for (const c of companies) { %>
         <tr>
-          <td class="mono" style="font-size:0.75rem"><%= c.domain %></td>
+          <td class="mono" style="font-size:0.75rem"><a href="/companies/<%= c.id %>"><%= c.domain %></a></td>
           <td>
             <%= c.contact_first_name || '' %> <%= c.contact_last_name || '' %>
             <% if (c.contact_position) { %><br><span class="text-muted" style="font-size:0.75rem"><%= c.contact_position %></span><% } %>
