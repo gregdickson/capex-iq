@@ -1,6 +1,7 @@
 import type { Job } from 'bullmq';
 import { generateEmails, type EmailGenerationInput } from '../../pipeline/emails.js';
 import { updateCompanyStatus, updatePipelineRunCounts, getCompanyById } from '../../db/queries.js';
+import { getQueue, QUEUE_NAMES } from '../setup.js';
 import type { ScoringResult } from '../../pipeline/scoring.js';
 import type { CAAnalysis } from '../../pipeline/ai-validation.js';
 
@@ -85,6 +86,14 @@ export async function handleEmailGeneration(
 
     await updatePipelineRunCounts(runId);
     console.log(`[email-gen] Generated ${emails.length} emails for ${data.companyName} (company #${companyId})`);
+
+    // Automatically enqueue GHL send
+    const ghlQueue = getQueue(QUEUE_NAMES.GHL_SEND);
+    await ghlQueue.add('ghl-send', { companyId, runId }, {
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 5000 },
+    });
+    console.log(`[email-gen] Enqueued GHL send for company #${companyId}`);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     await updateCompanyStatus(companyId, 'failed_email_generation', {
