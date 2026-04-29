@@ -228,6 +228,75 @@ router.post('/api/runs/:runId/enqueue-no-match', async (req: Request, res: Respo
   }
 });
 
+// --- Enqueue failed_qualification records for no-match email generation ---
+
+router.post('/api/runs/:runId/enqueue-failed-qual', async (req: Request, res: Response) => {
+  const runId = parseInt(String(req.params.runId), 10);
+  if (isNaN(runId)) { res.status(400).json({ error: 'Invalid run ID' }); return; }
+
+  try {
+    const { query: dbQuery } = await import('../db/client.js');
+    const result = await dbQuery<{
+      id: number; domain: string; org_name: string; org_description: string;
+      pipeline_run_id: number;
+    }>(
+      "SELECT * FROM processed_companies WHERE pipeline_run_id = $1 AND status = 'failed_qualification'",
+      [runId]
+    );
+
+    const records = result.rows;
+    if (records.length === 0) {
+      const referer = req.headers.referer || `/runs/${runId}`;
+      res.redirect(`${referer}${referer.includes('?') ? '&' : '?'}error=${encodeURIComponent('No failed_qualification records found')}`);
+      return;
+    }
+
+    const emailQueue = getQueue(QUEUE_NAMES.EMAIL_GENERATION);
+    let enqueued = 0;
+
+    for (const record of records) {
+      await updateCompanyStatus(record.id, 'pending', { error_log: null });
+
+      await emailQueue.add('generate', {
+        companyId: record.id,
+        runId: record.pipeline_run_id,
+        companyNumber: '',
+        companyName: record.org_name || record.domain,
+        orgName: record.org_name || '',
+        orgDescription: record.org_description || '',
+        scoring: null,
+        caAnalysis: null,
+        incorporationDate: null,
+        sicCode: null,
+        sicDescription: null,
+        location: null,
+        companyStatus: null,
+        financials: {},
+        extracted: {
+          currentPPE: 0,
+          previousPPE: 0,
+          totalAssets: 0,
+          turnoverRevenue: 0,
+          investmentProperty: 0,
+          sicCode: null,
+        },
+        isNoMatch: true,
+      }, {
+        attempts: 3,
+        backoff: { type: 'exponential', delay: 5000 },
+      });
+      enqueued++;
+    }
+
+    const referer = req.headers.referer || `/runs/${runId}`;
+    res.redirect(`${referer}${referer.includes('?') ? '&' : '?'}success=${encodeURIComponent(`Enqueued ${enqueued} failed qualification records for email generation`)}`);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const referer = req.headers.referer || `/runs/${runId}`;
+    res.redirect(`${referer}${referer.includes('?') ? '&' : '?'}error=${encodeURIComponent(message)}`);
+  }
+});
+
 // --- Manual trigger: GHL send + retry (same as cron) ---
 
 router.post('/api/trigger/send', async (_req: Request, res: Response) => {

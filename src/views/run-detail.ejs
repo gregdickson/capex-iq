@@ -17,14 +17,25 @@
 </div>
 
 <% const noMatchCount = summary.find(s => s.status === 'no_match'); %>
-<% if (noMatchCount && noMatchCount.count > 0) { %>
-  <div style="margin-bottom:1rem">
-    <form action="/api/runs/<%= run.id %>/enqueue-no-match" method="POST" style="display:inline"
-          onsubmit="return confirm('This will enqueue <%= noMatchCount.count %> no-match records for email generation. Continue?')">
-      <button type="submit" class="btn btn-primary">
-        Enqueue <%= noMatchCount.count %> no-match records for email generation
-      </button>
-    </form>
+<% const failedQualCount = summary.find(s => s.status === 'failed_qualification'); %>
+<% if ((noMatchCount && noMatchCount.count > 0) || (failedQualCount && failedQualCount.count > 0)) { %>
+  <div style="margin-bottom:1rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
+    <% if (noMatchCount && noMatchCount.count > 0) { %>
+      <form action="/api/runs/<%= run.id %>/enqueue-no-match" method="POST" style="display:inline"
+            onsubmit="return confirm('This will enqueue <%= noMatchCount.count %> no-match records for email generation. Continue?')">
+        <button type="submit" class="btn btn-primary">
+          Enqueue <%= noMatchCount.count %> no-match for emails
+        </button>
+      </form>
+    <% } %>
+    <% if (failedQualCount && failedQualCount.count > 0) { %>
+      <form action="/api/runs/<%= run.id %>/enqueue-failed-qual" method="POST" style="display:inline"
+            onsubmit="return confirm('This will enqueue <%= failedQualCount.count %> failed qualification records for email generation (no-match path). Continue?')">
+        <button type="submit" class="btn btn-primary">
+          Enqueue <%= failedQualCount.count %> failed qualification for emails
+        </button>
+      </form>
+    <% } %>
   </div>
 <% } %>
 
