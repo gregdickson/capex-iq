@@ -87,6 +87,8 @@ app.post('/settings', async (req, res) => {
 const PROMPT_KEYS = [
   'email_generation_system',
   'email_generation_user',
+  'email_generation_no_match_system',
+  'email_generation_no_match_user',
   'ca_analysis_system',
   'ca_analysis_user',
 ];

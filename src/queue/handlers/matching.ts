@@ -45,6 +45,37 @@ export async function handleMatching(
       });
     } else {
       await updateCompanyStatus(companyId, 'no_match');
+
+      // Enqueue email generation directly — skip qualification
+      const emailQueue = getQueue(QUEUE_NAMES.EMAIL_GENERATION);
+      await emailQueue.add('generate', {
+        companyId,
+        runId,
+        companyNumber: '',
+        companyName: orgName,
+        orgName,
+        orgDescription: job.data.orgDescription,
+        scoring: null,
+        caAnalysis: null,
+        incorporationDate: null,
+        sicCode: null,
+        sicDescription: null,
+        location: null,
+        companyStatus: null,
+        financials: {},
+        extracted: {
+          currentPPE: 0,
+          previousPPE: 0,
+          totalAssets: 0,
+          turnoverRevenue: 0,
+          investmentProperty: 0,
+          sicCode: null,
+        },
+        isNoMatch: true,
+      }, {
+        attempts: 3,
+        backoff: { type: 'exponential', delay: 5000 },
+      });
     }
 
     await updatePipelineRunCounts(runId);

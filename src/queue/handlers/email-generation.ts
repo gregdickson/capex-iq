@@ -12,8 +12,9 @@ export interface EmailGenerationJobData {
   companyName: string;
   orgName: string;
   orgDescription: string;
-  scoring: ScoringResult;
+  scoring: ScoringResult | null;
   caAnalysis: CAAnalysis | null;
+  isNoMatch?: boolean;
   incorporationDate: string | null;
   sicCode: number | null;
   sicDescription: string | null;
@@ -74,6 +75,7 @@ export async function handleEmailGeneration(
       netAssetGrowthRate: data.financials?.netAssetsGrowthRate || 0,
       scoring: data.scoring,
       caAnalysis: data.caAnalysis,
+      isNoMatch: data.isNoMatch || false,
     };
 
     const { emails, promptVersionId } = await generateEmails(input, env);
