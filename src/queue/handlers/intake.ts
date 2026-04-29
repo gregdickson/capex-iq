@@ -1,5 +1,5 @@
 import type { Job } from 'bullmq';
-import { parseCSV, filterContacts, dedupByDomain } from '../../pipeline/intake.js';
+import { parseCSV, filterContacts } from '../../pipeline/intake.js';
 import { getQueue, QUEUE_NAMES } from '../setup.js';
 import {
   createPipelineRun,
@@ -50,16 +50,12 @@ export async function handleIntake(job: Job<IntakeJobData>): Promise<{ runId: nu
     });
   }
 
-  // Dedup by domain
-  const deduped = dedupByDomain(passed);
-  console.log(`[intake] After dedup: ${deduped.length} unique domains`);
-
   // Check reprocess window and enqueue matching jobs
   const windowDays = await getSettingNumber('reprocess_window_days', 90);
   const matchingQueue = getQueue(QUEUE_NAMES.MATCHING);
   let enqueued = 0;
 
-  for (const contact of deduped) {
+  for (const contact of passed) {
     const alreadyProcessed = await checkDomainProcessed(contact.domain, windowDays);
 
     if (alreadyProcessed) {
