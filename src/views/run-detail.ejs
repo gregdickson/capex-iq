@@ -3,6 +3,9 @@
 <% if (typeof error !== 'undefined' && error) { %>
   <div class="alert alert-error"><%= error %></div>
 <% } %>
+<% if (typeof success !== 'undefined' && success) { %>
+  <div class="alert alert-success"><%= success %></div>
+<% } %>
 
 <div class="stats">
   <% for (const s of summary) { %>
@@ -12,6 +15,18 @@
     </div>
   <% } %>
 </div>
+
+<% const noMatchCount = summary.find(s => s.status === 'no_match'); %>
+<% if (noMatchCount && noMatchCount.count > 0) { %>
+  <div style="margin-bottom:1rem">
+    <form action="/api/runs/<%= run.id %>/enqueue-no-match" method="POST" style="display:inline"
+          onsubmit="return confirm('This will enqueue <%= noMatchCount.count %> no-match records for email generation. Continue?')">
+      <button type="submit" class="btn btn-primary">
+        Enqueue <%= noMatchCount.count %> no-match records for email generation
+      </button>
+    </form>
+  </div>
+<% } %>
 
 <div class="tabs">
   <a href="/runs/<%= run.id %>" class="tab <%= statusFilter === 'all' ? 'active' : '' %>">All (<%= total %>)</a>

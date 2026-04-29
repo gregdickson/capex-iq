@@ -59,6 +59,7 @@ router.get('/runs/:id', async (req: Request, res: Response) => {
     statusFilter: statusFilter || 'all',
     totalPages: Math.ceil(total / pageSize),
     error: req.query.error || null,
+    success: req.query.success || null,
   });
 });
 
