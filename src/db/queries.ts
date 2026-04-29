@@ -72,7 +72,6 @@ export async function insertProcessedCompany(data: InsertCompanyData) {
        contact_position, contact_seniority, contact_linkedin,
        org_name, org_size, org_city, org_country, org_industry
      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
-     ON CONFLICT (domain, pipeline_run_id) DO NOTHING
      RETURNING id`,
     [
       data.pipeline_run_id, data.domain, data.status,
@@ -138,8 +137,11 @@ export async function getRunCompanies(
     params
   );
 
+  const countWhere = statusFilter
+    ? 'WHERE pipeline_run_id = $1 AND status = $2'
+    : 'WHERE pipeline_run_id = $1';
   const countResult = await query(
-    `SELECT count(*)::int as total FROM processed_companies ${whereClause}`,
+    `SELECT count(*)::int as total FROM processed_companies ${countWhere}`,
     statusFilter ? [runId, statusFilter] : [runId]
   );
 
